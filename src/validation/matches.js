@@ -14,6 +14,17 @@ export const matchIdParamSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
+const scoreSchema = z.preprocess((val) => {
+  if (
+    val === null ||
+    typeof val === "boolean" ||
+    (typeof val === "string" && val.trim() === "")
+  ) {
+    return NaN;
+  }
+  return val;
+}, z.coerce.number().int().nonnegative());
+
 export const createMatchSchema = z
   .object({
     sport: z.string().trim().min(1),
@@ -21,8 +32,8 @@ export const createMatchSchema = z
     awayTeam: z.string().trim().min(1),
     startTime: z.iso.datetime(),
     endTime: z.iso.datetime(),
-    homeScore: z.coerce.number().int().nonnegative().optional(),
-    awayScore: z.coerce.number().int().nonnegative().optional(),
+    homeScore: scoreSchema.optional(),
+    awayScore: scoreSchema.optional(),
   })
   .superRefine(({ startTime, endTime }, ctx) => {
     if (new Date(endTime) <= new Date(startTime)) {
@@ -35,6 +46,7 @@ export const createMatchSchema = z
   });
 
 export const updateScoreSchema = z.object({
-  homeScore: z.coerce.number().int().nonnegative(),
-  awayScore: z.coerce.number().int().nonnegative(),
+  homeScore: scoreSchema,
+  awayScore: scoreSchema,
 });
+
