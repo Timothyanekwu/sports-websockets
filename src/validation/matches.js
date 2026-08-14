@@ -14,16 +14,9 @@ export const matchIdParamSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
-const scoreSchema = z.preprocess((val) => {
-  if (
-    val === null ||
-    typeof val === "boolean" ||
-    (typeof val === "string" && val.trim() === "")
-  ) {
-    return NaN;
-  }
-  return val;
-}, z.coerce.number().int().nonnegative());
+const scoreSchema = z
+  .union([z.number(), z.string().trim().min(1)])
+  .pipe(z.coerce.number().int().nonnegative());
 
 export const createMatchSchema = z
   .object({
